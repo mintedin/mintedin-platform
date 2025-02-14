@@ -63,3 +63,5 @@ lint:
 verify:
 	forge script script/VerifyAll.s.sol --ffi --rpc-url $(RPC_URL)
 
+# Install packages 
+install :;	forge install openzeppelin/openzeppelin-contracts@v5.2.0 --no-commit && forge install openzeppelin/openzeppelin-contracts-upgradeable@v5.2.0 --no-commit
