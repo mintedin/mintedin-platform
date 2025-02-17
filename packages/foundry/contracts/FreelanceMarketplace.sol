@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {IFreelanceMarketplace} from "./interfaces/IFreelanceMarketplace.sol";
+import {IFreelancerNFT} from "./interfaces/IFreelancerNFT.sol";
+import {IClientNFT} from "./interfaces/IClientNFT.sol";
 
 contract FreelanceMarketplace is
     Initializable,
@@ -21,46 +23,72 @@ contract FreelanceMarketplace is
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant MARKETPLACE_ADMIN = keccak256("MARKETPLACE_ADMIN");
 
-    // Contract global state variables
+    /// @custom:storage-location MintedIn:FreelanceMarketplace.storage.GlobalStorage
+    struct GlobalStorage {
+        address freelancerNFT;
+        address clientNFT;
+        uint256 platformFee; // In basis points, e.g. 100 = 1%
+        uint256 totalPlatformFees;
+        uint256 totalJobCount;
+    }
 
-    // Job specific state variables
-    // State Variables
-    uint256 public jobCounter;
-    uint256 public platformFee; // In basis points, e.g. 100 = 1%
-    uint256 public accumulatedFees;
+    // keccak256(abi.encode(uint256(keccak256("FreelanceMarketplace.storage.GlobalStorage")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant GlobalStorageLocation =
+        0x77e329dbd18313a6498d1f7e745f7c5db79ca6e9ca086a1fed9bec16ef173d00;
 
-    mapping(uint256 => Job) public jobs;
-    mapping(uint256 => uint256) public jobBalances; // escrow balance per job
+    function _getGlobalStorage()
+        private
+        pure
+        returns (GlobalStorage storage market)
+    {
+        assembly {
+            market.slot := GlobalStorageLocation
+        }
+    }
+
+    /// @custom:storage-location MintedIn:FreelanceMarketplace.storage.JobStorage
+    struct JobStorage {
+        mapping(uint256 => Job) jobs;
+    }
+
+    // keccak256(abi.encode(uint256(keccak256("FreelanceMarketplace.storage.JobStorage")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant JobStorageLocation =
+        0xd369c3b4404b67d31e97703c9fa86feddd7b94aac296d336931ec8dcfea86200;
+
+    function _getJobStorage() private pure returns (JobStorage storage jobs) {
+        assembly {
+            jobs.slot := JobStorageLocation
+        }
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    // Initializer function (replaces constructor)
-    function initialize(uint256 _platformFee) public initializer {
-        __FreelanceMarketplace_init(_platformFee);
-    }
-
-    function __FreelanceMarketplace_init(
-        uint256 _platformFee,
+    function initialize(
         address defaultAdmin,
         address pauser,
         address upgrader,
-        address marketplaceAdmin
-    ) internal initializer {
+        address marketplaceAdmin,
+        address initialFreelancerNFT,
+        address initialClientNFT,
+        uint256 initialPlatformFee
+    ) external initializer {
         __AccessControl_init();
         __Pausable_init();
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
 
-        _setupRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _setupRole(PAUSER_ROLE, pauser);
-        _setupRole(UPGRADER_ROLE, upgrader);
-        _setupRole(MARKETPLACE_ADMIN, marketplaceAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(PAUSER_ROLE, pauser);
+        _grantRole(UPGRADER_ROLE, upgrader);
+        _grantRole(MARKETPLACE_ADMIN, marketplaceAdmin);
 
-        platformFee = _platformFee;
-        jobCounter = 0;
+        GlobalStorage storage market = _getGlobalStorage();
+        market.freelancerNFT = initialFreelancerNFT;
+        market.clientNFT = initialClientNFT;
+        market.platformFee = initialPlatformFee;
     }
 
     // UUPS upgrade authorization
@@ -76,27 +104,42 @@ contract FreelanceMarketplace is
         _unpause();
     }
 
+    // Fallback functions to receive ETH
+    receive() external payable {}
+
+    fallback() external payable {}
+
     // --- Marketplace Functions ---
 
     // 1. createJob
-    function createJob() external whenNotPaused returns (uint256) {
-        jobCounter++;
-        uint256 jobId = jobCounter;
-        jobs[jobId] = Job({
+    function createJob() external payable whenNotPaused returns (uint256) {
+        _validateClient(msg.sender);
+
+        GlobalStorage storage market = _getGlobalStorage();
+
+        uint256 jobId = market.totalJobCount++;
+
+        JobStorage storage jobs = _getJobStorage();
+
+        jobs.jobs[jobId] = Job({
             id: jobId,
             client: msg.sender,
             freelancer: address(0),
-            escrowAmount: 0,
+            jobInitialBalance: msg.value,
+            jobCurrentBalance: msg.value,
             status: JobStatus.Created,
             feedback: 0
         });
+
         emit JobCreated(jobId, msg.sender);
         return jobId;
     }
 
     // 2. cancelJob
     function cancelJob(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.client == msg.sender, "Only client can cancel");
         require(
             job.status == JobStatus.Created || job.status == JobStatus.Funded,
@@ -110,20 +153,27 @@ contract FreelanceMarketplace is
     function fundJobEscrow(
         uint256 jobId
     ) external payable whenNotPaused nonReentrant {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.client == msg.sender, "Only client can fund");
         require(job.status == JobStatus.Created, "Job not in correct state");
         require(msg.value > 0, "Funding amount must be > 0");
 
-        job.escrowAmount = msg.value;
         job.status = JobStatus.Funded;
-        jobBalances[jobId] = msg.value;
+        job.jobInitialBalance += msg.value;
+        job.jobCurrentBalance += msg.value;
+
         emit JobFunded(jobId, msg.value);
     }
 
     // 4. acceptOffer
     function acceptOffer(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        _validateFreelancer(msg.sender);
+
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.status == JobStatus.Funded, "Job not funded or available");
         job.freelancer = msg.sender;
         job.status = JobStatus.Accepted;
@@ -132,7 +182,9 @@ contract FreelanceMarketplace is
 
     // 5. submitWork
     function submitWork(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(
             job.freelancer == msg.sender,
             "Only assigned freelancer can submit work"
@@ -144,7 +196,9 @@ contract FreelanceMarketplace is
 
     // 6. approveWork
     function approveWork(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.client == msg.sender, "Only client can approve work");
         require(job.status == JobStatus.Submitted, "Job not submitted");
         job.status = JobStatus.Approved;
@@ -153,7 +207,9 @@ contract FreelanceMarketplace is
 
     // 7. completeJob
     function completeJob(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.status == JobStatus.Approved, "Job not approved");
         job.status = JobStatus.Completed;
         emit JobCompleted(jobId);
@@ -161,7 +217,9 @@ contract FreelanceMarketplace is
 
     // 8. disputeJob
     function disputeJob(uint256 jobId) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(
             job.status == JobStatus.Approved ||
                 job.status == JobStatus.Completed,
@@ -176,7 +234,9 @@ contract FreelanceMarketplace is
         uint256 jobId,
         bool favorClient
     ) external whenNotPaused onlyRole(MARKETPLACE_ADMIN) {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.status == JobStatus.Disputed, "Job not disputed");
         job.status = JobStatus.Resolved;
         emit DisputeResolved(jobId);
@@ -187,21 +247,25 @@ contract FreelanceMarketplace is
     function releasePayment(
         uint256 jobId
     ) external whenNotPaused onlyRole(MARKETPLACE_ADMIN) nonReentrant {
-        Job storage job = jobs[jobId];
+        GlobalStorage storage market = _getGlobalStorage();
+
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(
             job.status == JobStatus.Completed ||
                 job.status == JobStatus.Resolved,
             "Job not ready for payment"
         );
-        uint256 amount = jobBalances[jobId];
+        uint256 amount = job.jobCurrentBalance;
         require(amount > 0, "No funds available");
 
         // Calculate fee deduction
-        uint256 fee = (amount * platformFee) / 10000;
+        uint256 fee = (amount * market.platformFee) / 10000;
         uint256 payout = amount - fee;
-        accumulatedFees += fee;
+        market.totalPlatformFees += fee;
 
-        jobBalances[jobId] = 0;
+        job.jobCurrentBalance = 0;
         payable(job.freelancer).transfer(payout);
         emit PaymentReleased(jobId, payout, job.freelancer);
     }
@@ -210,12 +274,16 @@ contract FreelanceMarketplace is
     function withdrawPayment(
         uint256 jobId
     ) external whenNotPaused nonReentrant {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.client == msg.sender, "Only client can withdraw");
         require(job.status == JobStatus.Cancelled, "Job not cancelled");
-        uint256 amount = jobBalances[jobId];
+
+        uint256 amount = job.jobCurrentBalance;
         require(amount > 0, "No funds available");
-        jobBalances[jobId] = 0;
+
+        job.jobCurrentBalance = 0;
         payable(job.client).transfer(amount);
         emit PaymentWithdrawn(jobId, amount, job.client);
     }
@@ -225,7 +293,9 @@ contract FreelanceMarketplace is
         uint256 jobId,
         uint256 rating
     ) external whenNotPaused {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
+
         require(job.client == msg.sender, "Only client can leave feedback");
         require(job.status == JobStatus.Completed, "Job not completed");
         job.feedback = rating;
@@ -238,9 +308,10 @@ contract FreelanceMarketplace is
         uint256 jobId,
         uint256 pointsDelta
     ) external whenNotPaused onlyRole(MARKETPLACE_ADMIN) {
-        Job storage job = jobs[jobId];
+        JobStorage storage jobs = _getJobStorage();
+        Job storage job = jobs.jobs[jobId];
         // In a real implementation, this would call an external NFT contract:
-        // freelanceNFT.updatePoints(tokenId, pointsDelta);
+        // FreelancerNFT.updatePoints(tokenId, pointsDelta);
         emit FreelancerReputationUpdated(job.freelancer, pointsDelta);
     }
 
@@ -248,7 +319,8 @@ contract FreelanceMarketplace is
     function setPlatformFee(
         uint256 newFee
     ) external whenNotPaused onlyRole(MARKETPLACE_ADMIN) {
-        platformFee = newFee;
+        GlobalStorage storage market = _getGlobalStorage();
+        market.platformFee = newFee;
         emit PlatformFeeSet(newFee);
     }
 
@@ -259,15 +331,55 @@ contract FreelanceMarketplace is
         onlyRole(MARKETPLACE_ADMIN)
         nonReentrant
     {
-        uint256 amount = accumulatedFees;
+        GlobalStorage storage market = _getGlobalStorage();
+
+        uint256 amount = market.totalPlatformFees;
         require(amount > 0, "No fees to withdraw");
-        accumulatedFees = 0;
+        market.totalPlatformFees = 0;
         payable(msg.sender).transfer(amount);
         emit PlatformFeesWithdrawn(amount, msg.sender);
     }
 
-    // Fallback functions to receive ETH
-    receive() external payable {}
+    function getFreelancerNFT() external view returns (address) {
+        GlobalStorage storage market = _getGlobalStorage();
+        return market.freelancerNFT;
+    }
 
-    fallback() external payable {}
+    function getClientNFT() external view returns (address) {
+        GlobalStorage storage market = _getGlobalStorage();
+        return market.clientNFT;
+    }
+
+    function getPlatformFee() external view returns (uint256) {
+        GlobalStorage storage market = _getGlobalStorage();
+        return market.platformFee;
+    }
+
+    function getTotalPlatformFees() external view returns (uint256) {
+        GlobalStorage storage market = _getGlobalStorage();
+        return market.totalPlatformFees;
+    }
+
+    function getTotalJobCount() external view returns (uint256) {
+        GlobalStorage storage market = _getGlobalStorage();
+        return market.totalJobCount;
+    }
+
+    function _validateClient(address client) private view {
+        GlobalStorage storage market = _getGlobalStorage();
+
+        uint256 tokenId = IClientNFT(market.clientNFT).tokenIdOf(client);
+
+        require(tokenId != 0, "Client does not have valid NFT");
+    }
+
+    function _validateFreelancer(address freelancer) private view {
+        GlobalStorage storage market = _getGlobalStorage();
+
+        uint256 tokenId = IFreelancerNFT(market.freelancerNFT).tokenIdOf(
+            freelancer
+        );
+
+        require(tokenId != 0, "Freelancer does not have valid NFT");
+    }
 }

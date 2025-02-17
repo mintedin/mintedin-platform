@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.0;
 
 interface IFreelanceMarketplace {
     // Job Status Enum
@@ -16,21 +16,13 @@ interface IFreelanceMarketplace {
         Resolved
     }
 
-    // Contract global variables
-    struct Global {
-        address freelanceNFT;
-        address clientNFT;
-        uint256 jobCount;
-        uint256 platformFee;
-        uint256 totalPlatformFees;
-    }
-
     // Job Structure
     struct Job {
         uint256 id;
         address client;
         address freelancer;
-        uint256 escrowAmount;
+        uint256 jobInitialBalance;
+        uint256 jobCurrentBalance;
         JobStatus status;
         uint256 feedback; // Simple rating or feedback score
     }
