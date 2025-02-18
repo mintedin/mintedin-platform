@@ -10,6 +10,7 @@ import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/t
 import {ERC721VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721VotesUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {IFreelancerNFT} from "../interfaces/IFreelancerNFT.sol";
 
 /// @custom:security-contact devs@mintedin.org
 contract FreelancerNFT is
@@ -21,12 +22,33 @@ contract FreelancerNFT is
     AccessControlUpgradeable,
     EIP712Upgradeable,
     ERC721VotesUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    IFreelancerNFT
 {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint256 private _nextTokenId;
+
+    /// @custom:storage-location MintedIn:FreelancerNFT.storage.FreelancerStorage
+    struct FreelancerStorage {
+        uint256 _nextTokenId;
+        mapping(address => uint256) tokenIds;
+        mapping(uint256 => Freelancer) freelancers;
+    }
+
+    // keccak256(abi.encode(uint256(keccak256("FreelancerNFT.storage.FreelancerStorage")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant FreelancerStorageLocation =
+        0x77e329dbd18313a6498d1f7e745f7c5db79ca6e9ca086a1fed9bec16ef173d00;
+
+    function _getFreelancerStorage()
+        private
+        pure
+        returns (FreelancerStorage storage freelancers)
+    {
+        assembly {
+            freelancers.slot := FreelancerStorageLocation
+        }
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -66,7 +88,12 @@ contract FreelancerNFT is
         address to,
         string memory uri
     ) public onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _nextTokenId++;
+        FreelancerStorage storage $ = _getFreelancerStorage();
+
+        uint256 tokenId = $._nextTokenId++;
+        $.tokenIds[to] = tokenId;
+        // $.freelancers[tokenId] = new Freelancer(0, 0, 0, new Job[](0));
+
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
@@ -142,5 +169,24 @@ contract FreelancerNFT is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    /// Dynamic attributes for FreelancerNFT
+    function tokenIdOf(address owner) external view override returns (uint256) {
+        FreelancerStorage storage $ = _getFreelancerStorage();
+        return $.tokenIds[owner];
+    }
+
+    function getFreelancerData(
+        uint256 tokenId
+    ) public view returns (Freelancer memory) {
+        return _getFreelancerStorage().freelancers[tokenId];
+    }
+
+    function setFreelancerData(
+        uint256 tokenId,
+        Freelancer memory data
+    ) public onlyRole(MINTER_ROLE) {
+        _getFreelancerStorage().freelancers[tokenId] = data;
     }
 }
