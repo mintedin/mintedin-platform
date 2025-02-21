@@ -1,21 +1,24 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
-import { WagmiConfig, createConfig } from "wagmi";
+import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
-import { createPublicClient, http } from "viem";
+import { publicProvider } from "wagmi/providers/public";
 import { metaMask } from "wagmi/connectors";
 
+// Configure chains and providers
+const { chains, publicClient, webSocketClient } = configureChains(
+  [mainnet, sepolia], // Add your chains here
+  [publicProvider()] // Add your providers here
+);
+
+// Create the wagmi config
 const config = createConfig({
   autoConnect: true,
-  publicClient: createPublicClient({
-    chain: mainnet,
-    transport: http(),
-  }),
+  publicClient,
+  webSocketClient,
   connectors: [
-    new metaMask({
-      chains: [mainnet, sepolia],
-    }),
+    metaMask({ chains }),
   ],
 });
 

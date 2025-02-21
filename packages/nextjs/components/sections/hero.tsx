@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAccount, useConnect } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
 import { metaMask } from "wagmi/connectors";
 
 export function HeroSection() {
-  const { address } = useAccount();
-  const { connect } = useConnect({
-    connector: new metaMask(),
+  const { address, isConnected } = useAccount();
+  const { connect, error } = useConnect({
+    connector: metaMask({ chains: [mainnet, sepolia] }),
   });
 
   return (
@@ -46,9 +47,16 @@ export function HeroSection() {
             onClick={() => connect()}
             className="px-8 py-3 rounded-lg bg-black/30 border border-cyber-teal text-white font-semibold hover:shadow-neon-teal transition-shadow duration-300"
           >
-            {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connect Wallet"}
+            {isConnected
+              ? `${address?.slice(0, 6)}...${address?.slice(-4)}`
+              : "Connect Wallet"}
           </button>
         </motion.div>
+        {error && (
+          <p className="text-red-500 mt-2">
+            {error.message}
+          </p>
+        )}
       </div>
     </section>
   );
