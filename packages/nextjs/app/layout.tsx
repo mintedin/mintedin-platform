@@ -1,6 +1,7 @@
 import './globals.scss';
 import { Space_Grotesk, Orbitron } from 'next/font/google';
 import { Providers } from '@/components/providers';
+import { WagmiProvider } from '@/components/wagmi-provider';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} ${orbitron.variable} font-space bg-dark-bg text-white antialiased`} suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <WagmiProvider>
+          <Providers>{children}</Providers>
+        </WagmiProvider>
       </body>
     </html>
   );

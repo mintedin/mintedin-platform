@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Shield } from "lucide-react";
 import { useAccount } from "wagmi";
-import { ConnectKitButton } from "connectkit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function MintPage() {
   const { isConnected } = useAccount();
@@ -19,7 +19,7 @@ export default function MintPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Here you would integrate with your smart contract
+    // Integration with smart contract will go here
     setTimeout(() => setIsLoading(false), 2000);
   };
 
@@ -38,7 +38,7 @@ export default function MintPage() {
           <p className="text-gray-400 mb-6">
             Please connect your wallet to mint your Freelancer NFT
           </p>
-          <ConnectKitButton />
+          <ConnectButton />
         </motion.div>
       </div>
     );

@@ -2,20 +2,13 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useAccount, useConnect } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
-import { metaMask } from "wagmi/connectors";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function HeroSection() {
-  const { address, isConnected } = useAccount();
-  const { connect, error } = useConnect({
-    connector: metaMask({ chains: [mainnet, sepolia] }),
-  });
-
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <motion.h1
+        <motion.h1 
           className="font-orbitron text-5xl md:text-7xl font-bold mb-6 neon-text"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -23,7 +16,7 @@ export function HeroSection() {
         >
           repChain
         </motion.h1>
-        <motion.p
+        <motion.p 
           className="text-xl md:text-2xl mb-8 text-cyber-teal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -43,20 +36,8 @@ export function HeroSection() {
           >
             Get Started
           </Link>
-          <button
-            onClick={() => connect()}
-            className="px-8 py-3 rounded-lg bg-black/30 border border-cyber-teal text-white font-semibold hover:shadow-neon-teal transition-shadow duration-300"
-          >
-            {isConnected
-              ? `${address?.slice(0, 6)}...${address?.slice(-4)}`
-              : "Connect Wallet"}
-          </button>
+          <ConnectButton />
         </motion.div>
-        {error && (
-          <p className="text-red-500 mt-2">
-            {error.message}
-          </p>
-        )}
       </div>
     </section>
   );
