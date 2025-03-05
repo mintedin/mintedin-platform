@@ -54,6 +54,7 @@
     "node": ">=18.18.0"
   },
   "dependencies": {
+    "@pinata/sdk": "^2.1.0",
     "@wagmi/chains": "^1.8.0",
     "@wagmi/connectors": "^5.7.7",
     "@wagmi/core": "^2.16.4",
