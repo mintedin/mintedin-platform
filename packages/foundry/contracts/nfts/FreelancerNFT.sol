@@ -87,7 +87,7 @@ contract FreelancerNFT is
     function safeMint(
         address to,
         string memory uri
-    ) public onlyRole(MINTER_ROLE) {
+    ) public {
         FreelancerStorage storage $ = _getFreelancerStorage();
 
         uint256 tokenId = $._nextTokenId++;
