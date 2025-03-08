@@ -16,7 +16,7 @@ const orbitron = Orbitron({
 });
 
 export const metadata = {
-  title: 'repChain - Web3 Reputation System',
+  title: 'MintedIn - Web3 Reputation System',
   description: 'Decentralized reputation management system for the Web3 ecosystem',
 };
 

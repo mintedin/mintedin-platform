@@ -8,15 +8,15 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <motion.h1 
+        <motion.h1
           className="font-orbitron text-5xl md:text-7xl font-bold mb-6 neon-text"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          repChain
+          MintedIn
         </motion.h1>
-        <motion.p 
+        <motion.p
           className="text-xl md:text-2xl mb-8 text-cyber-teal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
