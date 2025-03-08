@@ -10,7 +10,7 @@ config();
 
 // Get all arguments after the script name
 const args = process.argv.slice(2);
-let fileName = "Deploy.s.sol";
+let fileName = "DeployFreelancerNFT.s.sol";
 let network = "localhost";
 
 // Show help message if --help is provided
@@ -18,13 +18,13 @@ if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 Usage: yarn deploy [options]
 Options:
-  --file <filename>     Specify the deployment script file (default: Deploy.s.sol)
+  --file <filename>     Specify the deployment script file (default: DeployFreelancerNFT.s.sol)
   --network <network>   Specify the network (default: localhost)
   --help, -h           Show this help message
 Examples:
-  yarn deploy --file DeployYourContract.s.sol --network sepolia
+  yarn deploy --file DeployFreelancerNFT.s.sol --network sepolia
   yarn deploy --network sepolia
-  yarn deploy --file DeployYourContract.s.sol
+  yarn deploy --file DeployFreelancerNFT.s.sol
   yarn deploy
   `);
   process.exit(0);
