@@ -20,6 +20,10 @@ export default function MintPage() {
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [ipfsData, setIpfsData] = useState<{
+    imageUrl?: string;
+    metadataUrl?: string;
+  } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -44,22 +48,28 @@ export default function MintPage() {
 
     try {
       // First, upload the avatar image to IPFS if one was selected
-      let imageIpfsHash = null;
+      let imageResult = null;
       if (avatarFile) {
-        const imageResult = await pinFileToIPFS(avatarFile);
-        imageIpfsHash = imageResult.IpfsHash;
+        imageResult = await pinFileToIPFS(avatarFile);
       }
 
       // Create metadata JSON with form data and image reference
       const metadata = {
         ...formData,
-        image: imageIpfsHash ? `ipfs://${imageIpfsHash}` : null,
+        image: imageResult ? imageResult.IpfsHash : null,
+        imageUrl: imageResult?.gatewayUrl || null,
         createdAt: new Date().toISOString(),
       };
 
       // Upload the metadata JSON to IPFS
       const jsonResult = await pinJSONToIPFS(metadata);
       const metadataUri = `ipfs://${jsonResult.IpfsHash}`;
+
+      // Save the URLs for display
+      setIpfsData({
+        imageUrl: imageResult?.gatewayUrl || undefined,
+        metadataUrl: jsonResult.gatewayUrl,
+      });
 
       console.log("NFT Metadata URI:", metadataUri);
       // Here you would typically call your smart contract to mint the NFT
@@ -107,84 +117,139 @@ export default function MintPage() {
         <h1 className="text-3xl font-orbitron font-bold mb-8 neon-text text-center">
           Mint Your Freelancer NFT
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-white mb-2">Full Name</label>
-            <Input
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full border-cyber-teal bg-black/50"
-            />
-          </div>
 
-          <div>
-            <label className="block text-white mb-2">Professional Title</label>
-            <Input
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              required
-              className="w-full border-cyber-teal bg-black/50"
-              placeholder="e.g. Full-Stack Developer"
-            />
-          </div>
+        {ipfsData ? (
+          <div className="text-center space-y-6">
+            <h2 className="text-2xl font-semibold text-cyber-teal">
+              NFT Created Successfully!
+            </h2>
 
-          <div>
-            <label className="block text-white mb-2">Key Skills</label>
-            <Input
-              name="skills"
-              value={formData.skills}
-              onChange={handleInputChange}
-              required
-              className="w-full border-cyber-teal bg-black/50"
-              placeholder="e.g. React, Solidity, Node.js"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white mb-2">Years of Experience</label>
-            <Input
-              name="experience"
-              value={formData.experience}
-              onChange={handleInputChange}
-              required
-              type="number"
-              min="0"
-              className="w-full border-cyber-teal bg-black/50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white mb-2">Avatar Image</label>
-            <div className="flex items-center space-x-4">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="w-full border-cyber-teal bg-black/50"
-              />
-              {avatarPreview && (
-                <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-cyber-teal">
+            {ipfsData.imageUrl && (
+              <div className="flex flex-col items-center">
+                <h3 className="text-white mb-2">Your NFT Image:</h3>
+                <div className="h-48 w-48 rounded-lg overflow-hidden border-2 border-cyber-teal">
                   <img
-                    src={avatarPreview}
-                    alt="Avatar preview"
+                    src={ipfsData.imageUrl}
+                    alt="NFT"
                     className="h-full w-full object-cover"
                   />
                 </div>
-              )}
-            </div>
-          </div>
+                <a
+                  href={ipfsData.imageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-cyber-teal mt-2 hover:underline"
+                >
+                  View on IPFS
+                </a>
+              </div>
+            )}
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3"
-          >
-            {isLoading ? "Creating NFT..." : "Create Freelancer Profile NFT"}
-          </Button>
-        </form>
+            {ipfsData.metadataUrl && (
+              <div className="mt-4">
+                <h3 className="text-white mb-2">Metadata:</h3>
+                <a
+                  href={ipfsData.metadataUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyber-teal hover:underline"
+                >
+                  View Metadata on IPFS
+                </a>
+              </div>
+            )}
+
+            <Button
+              className="bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3 mt-4"
+              onClick={() => setIpfsData(null)}
+            >
+              Create Another NFT
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-white mb-2">Full Name</label>
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full border-cyber-teal bg-black/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white mb-2">
+                Professional Title
+              </label>
+              <Input
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                required
+                className="w-full border-cyber-teal bg-black/50"
+                placeholder="e.g. Full-Stack Developer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white mb-2">Key Skills</label>
+              <Input
+                name="skills"
+                value={formData.skills}
+                onChange={handleInputChange}
+                required
+                className="w-full border-cyber-teal bg-black/50"
+                placeholder="e.g. React, Solidity, Node.js"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white mb-2">
+                Years of Experience
+              </label>
+              <Input
+                name="experience"
+                value={formData.experience}
+                onChange={handleInputChange}
+                required
+                type="number"
+                min="0"
+                className="w-full border-cyber-teal bg-black/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white mb-2">Avatar Image</label>
+              <div className="flex items-center space-x-4">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="w-full border-cyber-teal bg-black/50"
+                />
+                {avatarPreview && (
+                  <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-cyber-teal">
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3"
+            >
+              {isLoading ? "Creating NFT..." : "Create Freelancer Profile NFT"}
+            </Button>
+          </form>
+        )}
       </motion.div>
     </div>
   );
