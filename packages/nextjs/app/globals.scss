@@ -48,18 +48,110 @@
 }
 
 .glassmorphism {
-  @apply backdrop-blur-xl bg-opacity-60 border border-gray-200;
-  background: rgba(255, 255, 255, 0.05);
+  @apply backdrop-blur-xl bg-opacity-60 border border-gray-200/20;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 4px 16px 0 rgba(0, 247, 255, 0.05);
+  
+  @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
 }
 
 .cyber-border {
-  @apply border-2 border-cyber-teal shadow-neon-teal;
+  @apply border-2 border-cyber-teal;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 0 15px rgba(0, 247, 255, 0.3);
+  }
 }
 
 .neon-text {
   @apply text-transparent bg-clip-text bg-gradient-to-r from-cyber-teal to-electric-purple;
+  text-shadow: 0 0 5px rgba(0, 247, 255, 0.3);
 }
 
-.particle-container {
-  @apply fixed top-0 left-0 w-full h-full -z-10;
+#tsparticles {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .glassmorphism {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  #tsparticles {
+    opacity: 0.4;
+  }
+}
+
+/* Smooth scrolling and better touch handling */
+html {
+  scroll-behavior: smooth;
+  touch-action: manipulation;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  background: rgb(3,7,18);
+  background: linear-gradient(135deg, rgb(3,7,18) 0%, rgb(24,29,49) 100%);
+}
+
+/* Better form controls on mobile */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Improved focus styles */
+:focus-visible {
+  outline: 2px solid var(--cyber-teal);
+  outline-offset: 2px;
+}
+
+/* Prevent layout shifts */
+* {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Interactive elements */
+button, a {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
 }
