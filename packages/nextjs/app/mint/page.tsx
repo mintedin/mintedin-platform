@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { pinFileToIPFS, pinJSONToIPFS } from "@/lib/utils";
 
 export default function MintPage() {
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -23,6 +23,7 @@ export default function MintPage() {
   const [ipfsData, setIpfsData] = useState<{
     imageUrl?: string;
     metadataUrl?: string;
+    metadataUri?: string;
   } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,21 +70,23 @@ export default function MintPage() {
       setIpfsData({
         imageUrl: imageResult?.gatewayUrl || undefined,
         metadataUrl: jsonResult.gatewayUrl,
+        metadataUri: metadataUri,
       });
 
       console.log("NFT Metadata URI:", metadataUri);
-      // Here you would typically call your smart contract to mint the NFT
-      // with the metadata URI as the tokenURI
 
-      alert(
-        `Success! Your freelancer profile has been created.\nMetadata URI: ${metadataUri}`
-      );
+      // No longer automatically alert success - we'll let the user proceed to minting
     } catch (error) {
-      console.error("Error creating NFT:", error);
-      alert("There was an error creating your NFT. Please try again.");
+      console.error("Error creating NFT metadata:", error);
+      alert("There was an error creating your NFT metadata. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Metadata URI copied to clipboard!");
   };
 
   if (!isConnected) {
@@ -121,7 +124,7 @@ export default function MintPage() {
         {ipfsData ? (
           <div className="text-center space-y-6">
             <h2 className="text-2xl font-semibold text-cyber-teal">
-              NFT Created Successfully!
+              Metadata Created Successfully!
             </h2>
 
             {ipfsData.imageUrl && (
@@ -156,15 +159,52 @@ export default function MintPage() {
                 >
                   View Metadata on IPFS
                 </a>
+                <div className="mt-2 text-white">
+                  <p className="font-semibold">
+                    Metadata URI for NFT Contract:
+                  </p>
+                  <div className="flex items-center justify-center mt-2">
+                    <code className="text-xs bg-black/30 p-2 rounded break-all max-w-full">
+                      {ipfsData.metadataUri}
+                    </code>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-2 border-cyber-teal text-cyber-teal"
+                      onClick={() =>
+                        copyToClipboard(ipfsData.metadataUri || "")
+                      }
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
 
-            <Button
-              className="bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3 mt-4"
-              onClick={() => setIpfsData(null)}
-            >
-              Create Another NFT
-            </Button>
+            <div className="mt-6 p-4 border border-cyan-500 bg-cyan-500/10 rounded-md text-cyan-400 text-sm">
+              <p className="mb-2 font-bold">Next Steps:</p>
+              <ol className="list-decimal pl-4 space-y-2 text-left">
+                <li>Copy the Metadata URI above</li>
+                <li>
+                  Use it with your wallet that has MINTER_ROLE permission to
+                  call the{" "}
+                  <code className="bg-black/30 px-1 rounded">safeMint</code>{" "}
+                  function on the NFT contract
+                </li>
+                <li>Parameters needed: your address and the Metadata URI</li>
+              </ol>
+            </div>
+
+            <div className="flex flex-col space-y-4 mt-6">
+              <Button
+                variant="outline"
+                className="border-cyber-teal text-cyber-teal hover:bg-cyber-teal/10"
+                onClick={() => setIpfsData(null)}
+              >
+                Create Different NFT
+              </Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -246,7 +286,14 @@ export default function MintPage() {
               disabled={isLoading}
               className="w-full bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3"
             >
-              {isLoading ? "Creating NFT..." : "Create Freelancer Profile NFT"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading to
+                  IPFS...
+                </>
+              ) : (
+                "Upload to IPFS"
+              )}
             </Button>
           </form>
         )}
