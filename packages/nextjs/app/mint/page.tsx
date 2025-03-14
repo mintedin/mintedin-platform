@@ -1,17 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Shield } from "lucide-react";
-import { useAccount } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useSwitchChain,
+  useWriteContract,
+  useSimulateContract,
+} from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { pinFileToIPFS, pinJSONToIPFS } from "@/lib/utils";
 
+// FreelancerNFT ABI - only including the functions we need
+const freelancerNftAbi = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "uri",
+        type: "string",
+      },
+    ],
+    name: "safeMint",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+// Contract information
+const CONTRACT_ADDRESS = "0x0eA71b3062Ee87Ec2EFbB3Ef1649174ab56261B5";
+const TARGET_CHAIN_ID = 534351;
+const CHAIN_NAME = "Scroll Sepolia";
+
 export default function MintPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [isLoading, setIsLoading] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     title: "",
@@ -25,6 +61,26 @@ export default function MintPage() {
     metadataUrl?: string;
     metadataUri?: string;
   } | null>(null);
+
+  // Setup contract interaction
+  const { data: simulateData } = useSimulateContract({
+    address: CONTRACT_ADDRESS,
+    abi: freelancerNftAbi,
+    functionName: "safeMint",
+    args:
+      !address || !ipfsData?.metadataUri || chainId !== TARGET_CHAIN_ID
+        ? undefined
+        : [address, ipfsData.metadataUri],
+  });
+
+  const {
+    writeContractAsync: mintNft,
+    isPending: isContractWriteLoading,
+    isSuccess: isMintSuccess,
+  } = useWriteContract();
+
+  // Check if we need to switch networks
+  const isCorrectNetwork = chainId === TARGET_CHAIN_ID;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -74,8 +130,6 @@ export default function MintPage() {
       });
 
       console.log("NFT Metadata URI:", metadataUri);
-
-      // No longer automatically alert success - we'll let the user proceed to minting
     } catch (error) {
       console.error("Error creating NFT metadata:", error);
       alert("There was an error creating your NFT metadata. Please try again.");
@@ -87,6 +141,71 @@ export default function MintPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert("Metadata URI copied to clipboard!");
+  };
+
+  const handleMint = async () => {
+    if (!ipfsData?.metadataUri) {
+      alert("No metadata URI found. Please upload metadata first.");
+      return;
+    }
+
+    setIsMinting(true);
+    try {
+      // Check if we need to switch networks
+      if (!isCorrectNetwork && switchChainAsync) {
+        await switchChainAsync({ chainId: TARGET_CHAIN_ID });
+      }
+
+      // Execute the mint transaction
+      if (mintNft && simulateData?.request) {
+        const tx = await mintNft(simulateData.request);
+        console.log("Mint transaction:", tx);
+        alert(
+          "NFT minting transaction submitted! Please check your wallet for confirmation."
+        );
+      } else {
+        throw new Error(
+          "Mint function not available. Make sure you are connected to the correct network."
+        );
+      }
+    } catch (error) {
+      console.error("Error minting NFT:", error);
+      alert(
+        `Error minting NFT: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
+  // Show network warning if on wrong network
+  const NetworkWarning = () => {
+    if (isConnected && !isCorrectNetwork) {
+      return (
+        <div className="p-3 mb-6 border border-yellow-500 bg-yellow-500/10 rounded-md text-yellow-400 text-sm">
+          You are connected to the wrong network. Please switch to {CHAIN_NAME}{" "}
+          to mint NFTs.
+          <Button
+            size="sm"
+            className="ml-3 bg-yellow-500 text-black"
+            onClick={async () => {
+              if (switchChainAsync) {
+                try {
+                  await switchChainAsync({ chainId: TARGET_CHAIN_ID });
+                } catch (error) {
+                  console.error("Failed to switch network:", error);
+                }
+              }
+            }}
+          >
+            Switch Network
+          </Button>
+        </div>
+      );
+    }
+    return null;
   };
 
   if (!isConnected) {
@@ -120,6 +239,8 @@ export default function MintPage() {
         <h1 className="text-3xl font-orbitron font-bold mb-8 neon-text text-center">
           Mint Your Freelancer NFT
         </h1>
+
+        <NetworkWarning />
 
         {ipfsData ? (
           <div className="text-center space-y-6">
@@ -182,21 +303,24 @@ export default function MintPage() {
               </div>
             )}
 
-            <div className="mt-6 p-4 border border-cyan-500 bg-cyan-500/10 rounded-md text-cyan-400 text-sm">
-              <p className="mb-2 font-bold">Next Steps:</p>
-              <ol className="list-decimal pl-4 space-y-2 text-left">
-                <li>Copy the Metadata URI above</li>
-                <li>
-                  Use it with your wallet that has MINTER_ROLE permission to
-                  call the{" "}
-                  <code className="bg-black/30 px-1 rounded">safeMint</code>{" "}
-                  function on the NFT contract
-                </li>
-                <li>Parameters needed: your address and the Metadata URI</li>
-              </ol>
-            </div>
-
             <div className="flex flex-col space-y-4 mt-6">
+              <Button
+                className="bg-cyber-teal hover:bg-cyber-teal/80 text-black font-bold py-3"
+                onClick={handleMint}
+                disabled={
+                  isMinting || isContractWriteLoading || !isCorrectNetwork
+                }
+              >
+                {isMinting || isContractWriteLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Minting
+                    NFT...
+                  </>
+                ) : (
+                  "Mint NFT on Scroll Sepolia"
+                )}
+              </Button>
+
               <Button
                 variant="outline"
                 className="border-cyber-teal text-cyber-teal hover:bg-cyber-teal/10"
