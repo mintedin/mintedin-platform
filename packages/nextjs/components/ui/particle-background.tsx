@@ -1,38 +1,45 @@
-// @ts-nocheck
 "use client";
 
-import { useCallback } from "react";
-import { loadFull } from "tsparticles";
-// Import particles but use type assertion
-// @ts-ignore
-import Particles from "react-tsparticles";
+import { useCallback, useEffect, useState } from "react";
+import { loadSlim } from "tsparticles-slim";
+import { Container, Engine } from "tsparticles-engine";
+import Particles from "react-particles";
 
 export function ParticleBackground() {
-  const particlesInit = useCallback(async (engine: any) => {
-    await loadFull(engine);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine);
   }, []);
 
   return (
     <Particles
       id="tsparticles"
       init={particlesInit}
-      className="particle-container"
       options={{
-        background: {
-          color: {
-            value: "transparent",
-          },
+        fullScreen: {
+          enable: true,
+          zIndex: -1
         },
-        fpsLimit: 120,
+        fpsLimit: 60,
         particles: {
           color: {
-            value: "#00f7ff",
+            value: "#ffffff",
           },
           links: {
-            color: "#8a2be2",
+            color: "#00f7ff",
             distance: 150,
             enable: true,
-            opacity: 0.5,
+            opacity: 0.2,
             width: 1,
           },
           move: {
@@ -40,8 +47,8 @@ export function ParticleBackground() {
             outModes: {
               default: "bounce",
             },
-            random: false,
-            speed: 1,
+            random: true,
+            speed: isMobile ? 0.5 : 1,
             straight: false,
           },
           number: {
@@ -49,10 +56,15 @@ export function ParticleBackground() {
               enable: true,
               area: 800,
             },
-            value: 80,
+            value: isMobile ? 40 : 80,
           },
           opacity: {
             value: 0.5,
+            animation: {
+              enable: true,
+              speed: 0.5,
+              minimumValue: 0.1,
+            },
           },
           shape: {
             type: "circle",
@@ -62,6 +74,21 @@ export function ParticleBackground() {
           },
         },
         detectRetina: true,
+        responsive: [
+          {
+            maxWidth: 768,
+            options: {
+              particles: {
+                number: {
+                  value: 40,
+                },
+                move: {
+                  speed: 0.5,
+                },
+              },
+            },
+          },
+        ],
       }}
     />
   );

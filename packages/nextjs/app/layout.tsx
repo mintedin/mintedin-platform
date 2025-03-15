@@ -1,23 +1,16 @@
 import './globals.scss';
-import { Space_Grotesk, Orbitron } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { WagmiProvider } from '@/components/wagmi-provider';
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-});
-
-const orbitron = Orbitron({
-  subsets: ['latin'],
-  variable: '--font-orbitron',
-  display: 'swap',
-});
+import { ParticleBackground } from '@/components/ui/particle-background';
+import { SpaceObjects } from '@/components/ui/space-objects';
+import { Footer } from '@/components/ui/footer';
 
 export const metadata = {
-  title: 'MintedIn - Web3 Reputation System',
-  description: 'Decentralized reputation management system for the Web3 ecosystem',
+  title: 'MintedIn - Decentralized NFT Reputation System',
+  description: 'The next generation decentralized reputation management system for Web3 professionals',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
@@ -27,9 +20,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} ${orbitron.variable} font-space bg-dark-bg text-white antialiased`} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-space bg-dark-bg text-white antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <WagmiProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            <ParticleBackground />
+            <SpaceObjects />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </Providers>
         </WagmiProvider>
       </body>
     </html>

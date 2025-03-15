@@ -221,7 +221,7 @@ export default function MintPage() {
             Connect Wallet
           </h1>
           <p className="text-gray-400 mb-6">
-            Please connect your wallet to mint your Freelancer NFT
+            Please connect your wallet to mint your NFT
           </p>
           <ConnectButton />
         </motion.div>

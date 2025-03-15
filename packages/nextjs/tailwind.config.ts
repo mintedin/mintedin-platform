@@ -52,8 +52,8 @@ const config: Config = {
         'cyber-black': '#0A0A0A',
       },
       fontFamily: {
-        space: ['var(--font-space-grotesk)'],
-        orbitron: ['var(--font-orbitron)'],
+        space: ['Space Grotesk', 'sans-serif'],
+        orbitron: ['Orbitron', 'sans-serif'],
       },
       backgroundImage: {
         'cyber-gradient': 'linear-gradient(to right, rgb(3,7,18), rgb(24,29,49))',
