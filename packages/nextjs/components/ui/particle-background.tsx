@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, useRef } from "react";
-import { Engine } from "tsparticles-engine";
+import { useCallback, useEffect, useState } from "react";
+import Particles from "react-particles";
 import { loadSlim } from "tsparticles-slim";
+import type { Engine } from "tsparticles-engine";
 
 export function ParticleBackground() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const engineRef = useRef<Engine | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -18,25 +17,17 @@ export function ParticleBackground() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const initParticles = useCallback(async () => {
-    if (!containerRef.current) return;
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine);
+  }, []);
 
-    // Dynamic import tsparticles to avoid SSR issues
-    const { tsParticles } = await import("tsparticles-engine");
-
-    // Load the slim bundle
-    await loadSlim(tsParticles);
-
-    // Save the engine reference
-    engineRef.current = tsParticles;
-
-    // Create the particles
-    await tsParticles.load({
-      id: "tsparticles",
-      element: containerRef.current,
-      options: {
+  return (
+    <Particles
+      id="tsparticles"
+      init={particlesInit}
+      options={{
         fullScreen: {
-          enable: false,
+          enable: true,
           zIndex: -1,
         },
         fpsLimit: 60,
@@ -98,65 +89,7 @@ export function ParticleBackground() {
             },
           },
         ],
-      },
-    });
-
-    // Cleanup function
-    return () => {
-      // Call the destroy function if it exists
-      if (engineRef.current) {
-        try {
-          // @ts-ignore - Ignore TypeScript errors as the API might change
-          engineRef.current.destroy?.();
-        } catch (e) {
-          console.error("Error cleaning up particles:", e);
-        }
-      }
-    };
-  }, [isMobile]);
-
-  useEffect(() => {
-    // Initialize particles
-    let destroyFn: (() => void) | undefined;
-
-    const init = async () => {
-      try {
-        const result = await initParticles();
-        // Store any cleanup function if returned
-        if (typeof result === "function") {
-          destroyFn = result;
-        }
-      } catch (error) {
-        console.error("Failed to initialize particles:", error);
-      }
-    };
-
-    init();
-
-    // Cleanup function
-    return () => {
-      // Call the destroy function if it exists
-      if (destroyFn) {
-        destroyFn();
-      }
-
-      // Additional cleanup - try to destroy the container directly
-      if (engineRef.current) {
-        try {
-          // @ts-ignore - Ignore TypeScript errors as the API might change
-          engineRef.current.destroy?.();
-        } catch (e) {
-          console.error("Error cleaning up particles:", e);
-        }
-      }
-    };
-  }, [initParticles]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="fixed inset-0 z-[-1]"
-      aria-hidden="true"
+      }}
     />
   );
 }

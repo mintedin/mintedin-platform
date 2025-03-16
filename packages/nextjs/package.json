@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "echo 'Skipping react-particles postinstall script'"
   },
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
@@ -54,12 +55,13 @@
     "react-day-picker": "^9.6.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.54.2",
+    "react-particles": "^2.12.2",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "tsparticles": "^3.8.1",
+    "tsparticles": "^2.12.0",
     "tsparticles-engine": "^2.12.0",
     "tsparticles-slim": "^2.12.0",
     "vaul": "^1.1.2",
