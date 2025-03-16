@@ -2841,7 +2841,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rainbow-me/rainbowkit@npm:^2.0.0":
+"@rainbow-me/rainbowkit@npm:^2.2.4":
   version: 2.2.4
   resolution: "@rainbow-me/rainbowkit@npm:2.2.4"
   dependencies:
@@ -3005,7 +3005,7 @@ __metadata:
     "@radix-ui/react-toggle": ^1.1.2
     "@radix-ui/react-toggle-group": ^1.1.2
     "@radix-ui/react-tooltip": ^1.1.8
-    "@rainbow-me/rainbowkit": ^2.0.0
+    "@rainbow-me/rainbowkit": ^2.2.4
     "@tanstack/react-query": ^5.17.19
     "@types/node": ^20.11.20
     "@types/react": ^18.2.58
@@ -3017,9 +3017,9 @@ __metadata:
     embla-carousel-react: ^8.5.2
     eslint: ^8.56.0
     eslint-config-next: 14.1.0
-    framer-motion: ^11.0.8
+    framer-motion: ^12.5.0
     input-otp: ^1.4.2
-    lucide-react: ^0.344.0
+    lucide-react: ^0.482.0
     next: 14.1.0
     next-themes: ^0.2.1
     pinata: ^2.0.1
@@ -6571,12 +6571,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^11.0.8":
-  version: 11.18.2
-  resolution: "framer-motion@npm:11.18.2"
+"framer-motion@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "framer-motion@npm:12.5.0"
   dependencies:
-    motion-dom: ^11.18.1
-    motion-utils: ^11.18.1
+    motion-dom: ^12.5.0
+    motion-utils: ^12.5.0
     tslib: ^2.4.0
   peerDependencies:
     "@emotion/is-prop-valid": "*"
@@ -6589,7 +6589,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 99ce30d07398b97f4c98829b0679f7603c820f796113045683cfdd44323ff744a7be530d65077db42e044d3323c8503a18c876a8a88f3ded2b40889ce2acb6ac
+  checksum: aebf78b75000c783d12a8ae2534e62f0a5781490c0cfdf39c051b6dee2c7e11a5b8dd1077cc659e55dc24f582aa5d620c28999f3c17e17d38e49b14c6298d86b
   languageName: node
   linkType: hard
 
@@ -7854,12 +7854,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.344.0":
-  version: 0.344.0
-  resolution: "lucide-react@npm:0.344.0"
+"lucide-react@npm:^0.482.0":
+  version: 0.482.0
+  resolution: "lucide-react@npm:0.482.0"
   peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0
-  checksum: 9fd168fd64e4bb2475a955b60ab7a55d25b610da8e5c2b9cc2c66945d64f6703a8587b40ad960caca98528c6a0d8c9c97acc2c6ae02bd7f42647afeec4605b8f
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 67867a771eb35fc462577e0eb9e6718c2cb07218780b1eed64ebaf37da23e408461591faa136e86bd9633c9aad2706ffca9533caa575e008ae12156970deca41
   languageName: node
   linkType: hard
 
@@ -8121,19 +8121,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"motion-dom@npm:^11.18.1":
-  version: 11.18.1
-  resolution: "motion-dom@npm:11.18.1"
+"motion-dom@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "motion-dom@npm:12.5.0"
   dependencies:
-    motion-utils: ^11.18.1
-  checksum: c801aad3a9268221a0c346d71aae68cc2ddf3f5063ce02bbb6d9f4b7c509de16aa2eae3a8e5f0423087d38110bd17a8a75886f646bf9225ba4bad97a50e3ab76
+    motion-utils: ^12.5.0
+  checksum: abe92c72fb09eba9a6071fb77aa2020d1489df31c2291f5e3ff15def091d8b2bacb8a60854c5617f40f99e70178c0407519ca846a57e48051c4f49808e0f5927
   languageName: node
   linkType: hard
 
-"motion-utils@npm:^11.18.1":
-  version: 11.18.1
-  resolution: "motion-utils@npm:11.18.1"
-  checksum: e8789e50dce6e952226608e8f7eb8e03779332849f38c70cc9e1fbd5e34f2e6d0efb2d565091de999135ec3a3d4a0df1a796833cccd8f6a2313f81445c6e5b83
+"motion-utils@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "motion-utils@npm:12.5.0"
+  checksum: 347169ab97d8b3720b363afad6c9f4e8999490d1d95c70aaa8f83333be1b8b4e11c5f25564a9809fb091160fad2184403222e5b383be1bba004243c8b47497fe
   languageName: node
   linkType: hard
 
