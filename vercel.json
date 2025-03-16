@@ -1,12 +1,19 @@
 {
-  "buildCommand": "cd packages/nextjs && npm install --no-package-lock && NODE_OPTIONS='--max-old-space-size=4096' npm run build",
+  "version": 2,
+  "buildCommand": "cd packages/nextjs && npm install --no-package-lock && npm run vercel-build",
   "outputDirectory": "packages/nextjs/.next",
-  "framework": "nextjs",
   "installCommand": "cd packages/nextjs && npm install --no-scripts && npm run postinstall",
   "builds": [
     {
       "src": "packages/nextjs/package.json",
       "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "packages/nextjs/$1",
+      "continue": true
     }
   ]
 }
