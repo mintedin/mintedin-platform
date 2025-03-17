@@ -1,19 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "cd packages/nextjs && npm install --no-package-lock && npm run vercel-build",
+  "framework": "nextjs",
   "outputDirectory": "packages/nextjs/.next",
-  "installCommand": "cd packages/nextjs && npm install --no-scripts && npm run postinstall",
-  "builds": [
-    {
-      "src": "packages/nextjs/package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "buildCommand": "./build.sh",
+  "installCommand": "npm install -g npm@latest",
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "packages/nextjs/$1",
-      "continue": true
+      "dest": "packages/nextjs/$1"
     }
   ]
 }

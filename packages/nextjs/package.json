@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node postinstall-autoprefixer.js && next build",
-    "vercel-build": "node postinstall-autoprefixer.js && node vercel-build.js",
+    "build": "npm install autoprefixer postcss tailwindcss --no-save && next build",
+    "vercel-build": "npm install autoprefixer postcss tailwindcss --no-save && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "echo 'Skipping react-particles postinstall script' && touch node_modules/.postinstall-complete && node postinstall-autoprefixer.js"
+    "postinstall": "echo 'Skipping react-particles postinstall script' && touch node_modules/.postinstall-complete"
   },
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
