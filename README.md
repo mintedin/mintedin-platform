@@ -1,119 +1,115 @@
-# 🏗 Scaffold-ETH 2
+# MintedIn: Blockchain-Powered Freelance Platform
 
 <h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
+  A decentralized freelance marketplace with evolvable NFTs for reputation and transparent on-chain history
 </h4>
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+## 🚀 Vision
 
-⚙️ Built using NextJS, RainbowKit, Foundry, Wagmi, Viem, and Typescript.
+MintedIn transforms the freelance economy by using NFTs as on-chain reputation identities. Our platform leverages blockchain technology to create a more transparent, fair, and efficient marketplace for freelancers and clients.
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+## ✨ Key Features
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+### NFT-Based Reputation System
 
-## Requirements
+- **Evolving Freelancer NFTs**: Start at Bronze tier and evolve to Silver, Gold, and higher tiers based on performance
+- **Client NFTs**: Reflect hiring history, total spend, and ratings as a client
+- **On-Chain Verification**: All reputation data is transparent and immutable on the blockchain
 
-Before you begin, you need to install the following tools:
+### Transparent Marketplace
+
+- **Lower Fees**: Significantly reduced fees compared to traditional platforms (Upwork, Fiverr)
+- **Smart Contract Escrow**: Secure, automated payment release when work is completed
+- **Dispute Resolution**: Fair resolution process managed by trusted community members
+
+### Complete Job Lifecycle
+
+- **Job Creation and Funding**: Clients create and fund jobs with native cryptocurrency
+- **Work Submission and Approval**: Clear process for submitting and approving completed work
+- **Rating and Feedback**: Performance metrics directly impact NFT evolution
+
+## 🏗 Technical Architecture
+
+MintedIn is built on three core contracts:
+
+1. **FreelancerNFT**: ERC-721 token representing freelancer reputation and skills
+2. **ClientNFT**: ERC-721 token representing client reputation and history
+3. **FreelanceMarketplace**: Central contract managing jobs, payments, and the reputation system
+
+## 🧱 Getting Started
+
+### Requirements
 
 - [Node (>= v18.18)](https://nodejs.org/en/download/)
 - Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
 - [Git](https://git-scm.com/downloads)
 
-## Quickstart
+### Setup
 
-To get started with Scaffold-ETH 2, follow the steps below:
+1. Install dependencies:
 
-1. Install dependencies if it was skipped in CLI:
-
-```
-cd my-dapp-example
+```bash
 yarn install
 ```
 
-2. Navigate to foundry
+2. Install Foundry dependencies:
 
-
-```
+```bash
 cd packages/foundry
-```
-
-3. Install openzeppelin/openzeppelin-contracts
-
-```
 forge install openzeppelin/openzeppelin-contracts --no-commit
-```
-
-4. Navigate back to root
-
-```
+forge install foundry-rs/forge-std --no-commit
 cd ../..
 ```
 
-5. Run a local network in the first terminal:
+3. Run a local network:
 
-```
+```bash
 yarn chain
 ```
 
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
+4. Deploy the contracts:
 
-6. On a second terminal, deploy the test contract:
-
-```
+```bash
 yarn deploy
 ```
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
+5. Start the frontend:
 
-7. On a third terminal, start your NextJS app:
-
-```
+```bash
 yarn start
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+Visit your app on: `http://localhost:3000`
 
-Run smart contract test with `yarn foundry:test`
+## 🧪 Running Tests
 
-- Edit your smart contracts in `packages/foundry/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
+We've created comprehensive tests for all contracts in the `packages/foundry/test` directory:
 
-## 🚀 Setup ERC-721 NFT Extension
+```bash
+# Run all tests
+yarn foundry:test
 
-This extension introduces an ERC-721 token contract and demonstrates how to use it, including getting the total supply and holder balance, listing all NFTs from the collection and NFTs from the connected address, and how to transfer NFTs.
+# Run specific test files
+cd packages/foundry
+forge test --match-path test/FreelancerNFT.t.sol
+forge test --match-path test/ClientNFT.t.sol
+forge test --match-path test/FreelanceMarketplace.t.sol
+```
 
-The ERC-721 Token Standard introduces a standard for Non-Fungible Tokens ([EIP-721](https://eips.ethereum.org/EIPS/eip-721)), in other words, each token is unique.
+## 💡 Why This Matters
 
-The ERC-721 token contract is implemented using the [ERC-721 token implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol) from OpenZeppelin.
+- **Gamified Engagement**: Evolving NFTs represent growth and reliability, encouraging quality work
+- **Transparent Reputation**: On-chain progression means reputations cannot be faked
+- **Lower Fees**: Direct interactions reduce middleman costs
+- **Portable Identity**: Your reputation travels with you across the Web3 ecosystem
+- **Community Governance**: Platform rules and improvements decided by active participants
 
-The ERC-721 token implementation uses the [ERC-721 Enumerable extension](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721Enumerable.sol) from OpenZeppelin to list all tokens from the collection and all the tokens owned by an address. You can remove this if you plan to use an indexer, like a Subgraph or Ponder ([extensions available](https://scaffoldeth.io/extensions)).
+## 🛠 Development
 
-### Setup
+- Smart contracts are in `packages/foundry/contracts`
+- Frontend is built with NextJS in `packages/nextjs`
+- Tests are in `packages/foundry/test`
 
-Deploy your contract running ```yarn deploy```
+---
 
-### Interact with the NFT
-
-Start the front-end with ```yarn start``` and go to the _/erc721_ page to interact with your deployed ERC-721 token.
-
-You can check the code at ```packages/nextjs/app/erc721```.
-
-
-## Documentation
-
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
-
-To know more about its features, check out our [website](https://scaffoldeth.io).
-
-## Contributing to Scaffold-ETH 2
-
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+Built with ❤️ using [Scaffold-ETH 2](https://scaffoldeth.io)
