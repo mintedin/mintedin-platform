@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm install autoprefixer postcss tailwindcss --no-save && next build",
-    "vercel-build": "npm install autoprefixer postcss tailwindcss --no-save && next build",
+    "build": "node resolve-modules.js && NODE_PATH=. next build",
+    "vercel-build": "bash ./build.sh",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "echo 'Skipping react-particles postinstall script' && touch node_modules/.postinstall-complete"
@@ -73,6 +73,7 @@
     "wagmi": "^2.5.7"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.26.10",
     "@types/node": "^20.11.20",
     "@types/react": "^18.2.58",
     "@types/react-dom": "^18.2.19",

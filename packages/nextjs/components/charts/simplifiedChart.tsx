@@ -14,6 +14,7 @@ import {
   Area,
   BarChart,
   Bar,
+  TooltipProps,
 } from "recharts";
 
 // Simple data for demo charts
@@ -44,7 +45,11 @@ export function SimpleChart({
   className = "",
 }: ChartProps) {
   // Custom tooltip component
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<any, any>) => {
     if (active && payload && payload.length) {
       return (
         <div className="glassmorphism p-2 text-sm">
@@ -68,7 +73,7 @@ export function SimpleChart({
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
             <XAxis dataKey="name" tick={{ fill: "#fff" }} />
             <YAxis tick={{ fill: "#fff" }} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={CustomTooltip} />
             <Legend />
             {dataKeys.map((key, index) => (
               <Area
@@ -88,7 +93,7 @@ export function SimpleChart({
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
             <XAxis dataKey="name" tick={{ fill: "#fff" }} />
             <YAxis tick={{ fill: "#fff" }} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={CustomTooltip} />
             <Legend />
             {dataKeys.map((key, index) => (
               <Bar
@@ -106,7 +111,7 @@ export function SimpleChart({
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
             <XAxis dataKey="name" tick={{ fill: "#fff" }} />
             <YAxis tick={{ fill: "#fff" }} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={CustomTooltip} />
             <Legend />
             {dataKeys.map((key, index) => (
               <Line

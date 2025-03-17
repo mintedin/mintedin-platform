@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# Exit on any error
+# Exit on error
 set -e
 
-echo "📦 Setting up Next.js project..."
+echo "📦 Starting build process..."
 
-# Install dependencies with detailed output
-echo "📦 Installing dependencies..."
+# Install dependencies
+echo "🔧 Installing dependencies..."
 npm install --legacy-peer-deps
 
-# Ensure CSS dependencies are installed
-echo "🎨 Installing CSS processors..."
-npm install autoprefixer postcss tailwindcss --no-save
+# Run the module resolution script
+echo "🔄 Setting up module resolution..."
+node resolve-modules.js
 
-# Run the build
+# Build the Next.js app
 echo "🏗️ Building Next.js app..."
-npm run build
+NODE_PATH=. npx next build
 
-echo "✅ Build completed successfully" 
+echo "✅ Build completed successfully!" 
