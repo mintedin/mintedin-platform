@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { loadSlim } from "tsparticles-slim";
 import { Container, Engine } from "tsparticles-engine";
-import Particles from "react-particles";
+import Particles from "react-tsparticles";
 
 export function ParticleBackground() {
   const [isMobile, setIsMobile] = useState(false);
@@ -13,8 +13,8 @@ export function ParticleBackground() {
       setIsMobile(window.innerWidth <= 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const particlesInit = useCallback(async (engine: Engine) => {
@@ -28,7 +28,7 @@ export function ParticleBackground() {
       options={{
         fullScreen: {
           enable: true,
-          zIndex: -1
+          zIndex: -1,
         },
         fpsLimit: 60,
         particles: {
