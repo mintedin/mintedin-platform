@@ -4787,7 +4787,7 @@ own-keys@^1.0.1:
     object-keys "^1.1.1"
     safe-push-apply "^1.0.0"
 
-ox@0.6.7, ox@0.6.9:
+ox@0.6.7:
   version "0.6.7"
   dependencies:
     "@adraffy/ens-normalize" "^1.10.1"
@@ -6447,7 +6447,7 @@ viem@^2.1.1:
     ws "8.18.0"
 
 viem@^2.23.4:
-  version "2.23.11"
+  version "2.23.4"
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"
@@ -6455,8 +6455,8 @@ viem@^2.23.4:
     "@scure/bip39" "1.5.4"
     abitype "1.0.8"
     isows "1.0.6"
-    ox "0.6.9"
-    ws "8.18.1"
+    ox "0.6.7"
+    ws "8.18.0"
 
 viem@^2.7.9:
   version "2.23.5"
@@ -6604,7 +6604,7 @@ ws@~8.17.1:
 ws@7.4.6:
   version "7.4.6"
 
-ws@8.18.0, ws@8.18.1:
+ws@8.18.0:
   version "8.18.0"
 
 xmlhttprequest-ssl@~2.1.1:
