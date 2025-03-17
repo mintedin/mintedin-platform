@@ -25,3 +25,6 @@ dist
 # nextjs .yarn
 ./packages/nextjs/.yarn
 ./packages/nextjs/.bolt
+
+# foundry
+./packages/foundry/lib
