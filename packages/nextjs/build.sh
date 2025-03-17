@@ -4,7 +4,6 @@
 set -e
 
 echo "📦 Setting up Next.js project..."
-cd packages/nextjs
 
 # Install dependencies with detailed output
 echo "📦 Installing dependencies..."
