@@ -13,7 +13,7 @@ const socialLinks = [
   {
     name: "GitHub",
     icon: Github,
-    href: "#",
+    href: "https://github.com/mintedin",
   },
   {
     name: "LinkedIn",
