@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "buildCommand": "bash ./build.sh",
+  "outputDirectory": ".next",
+  "installCommand": "npm install --legacy-peer-deps",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
+  ]
+}
