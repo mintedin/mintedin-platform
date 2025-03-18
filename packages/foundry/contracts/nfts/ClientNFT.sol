@@ -84,10 +84,7 @@ contract ClientNFT is
         _unpause();
     }
 
-    function safeMint(
-        address to,
-        string memory uri
-    ) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to, string memory uri) public {
         ClientStorage storage $ = _getClientStorage();
 
         uint256 tokenId = $._nextTokenId++;

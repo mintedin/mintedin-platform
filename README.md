@@ -96,6 +96,14 @@ forge test --match-path test/ClientNFT.t.sol
 forge test --match-path test/FreelanceMarketplace.t.sol
 ```
 
+## Deployment on Scroll sepolia:
+
+FreelancerNFT: 0x0eA71b3062Ee87Ec2EFbB3Ef1649174ab56261B5
+
+ClientNFT: 0xE5267ad87985d9ddddE8D4962e1CD81272a68CdC
+
+FreelanceMarketplace: 0x840FbcaaED5cA99f53F24ED4A7E904a0a11cBD91
+
 ## 💡 Why This Matters
 
 - **Gamified Engagement**: Evolving NFTs represent growth and reliability, encouraging quality work
